@@ -13,8 +13,8 @@ pip -r requirements.txt
 ```
 ### Add your Telegram API Token, base and end to ENV
 
-Current base: 540513002
-Current end: 515
+- Current base: 540513002
+- Current end: 515
 
 ## Usage
 
