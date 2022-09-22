@@ -25,7 +25,7 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
 # Create custom keyboard
-ticket_button = KeyboardButton('Genereer parkeerticket')
+ticket_button = KeyboardButton('🎟️  Genereer parkeerticket  🎟️')
 bot_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(ticket_button)
 
 # Wait for start command and show keyboard
@@ -54,6 +54,9 @@ async def english(message: types.Message):
     # Create code with base + time + end
     code = f'{BASE}{year}{month}{day}{hour}{minute}{second}{END}'
     
+    # Create caption
+    caption = f"Code: {code}\nScan de QR aan de uitgang van de parking!"
+    
     # Create QR
     qr = qrcode.QRCode(
     version=1,
@@ -72,9 +75,9 @@ async def english(message: types.Message):
     bio.name = "qr.png"
     img.save(bio, 'PNG')
     bio.seek(0)
-
+    
     # Send
-    await message.reply_photo(photo=bio, caption=code)
+    await message.reply_photo(photo=bio, caption=caption)
 
 # Run bot
 if __name__ == '__main__':
