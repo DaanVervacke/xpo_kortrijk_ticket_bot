@@ -13,7 +13,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 # ENV stuff
 load_dotenv()
-API_TOKEN_TICKET_BOT = os.getenv('API_TOKEN') # Your own Telegram bot API token
+API_TOKEN = os.getenv('API_TOKEN_TICKET_BOT') # Your own Telegram bot API token
 BASE = os.getenv('BASE') # 540513002 (for now)
 END = os.getenv('END') # 515 (for now)
 
