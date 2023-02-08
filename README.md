@@ -25,12 +25,6 @@ docker build -t xpo_kortrijk_ticket_bot_container .
 docker run --env-file=<.your env file> -dit xpo_kortrijk_ticket_bot_container
 ```
 
-## Usage
-
-```bash
-python bot.py
-```
-
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
