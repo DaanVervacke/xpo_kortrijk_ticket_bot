@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import qrcode
 import os
@@ -12,32 +13,35 @@ from PIL import ImageFont
 
 from datetime import datetime as dt
 
-from aiogram import Bot, Dispatcher, executor, types
+from aiogram import F
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters.command import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import BufferedInputFile
 
 # ENV stuff
 load_dotenv()
 API_TOKEN = os.getenv('API_TOKEN')  # Your own Telegram bot API token
 VIVES_BASE = os.getenv('VIVES_BASE')
 VIVES_END = os.getenv('VIVES_END')
-MCDO_BASE = os.getenv('MCDO_BASE')  
-MCDO_END = os.getenv('MCDO_END') 
+MCDO_BASE = os.getenv('MCDO_BASE')
+MCDO_END = os.getenv('MCDO_END')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
 # Create custom keyboard
-vives_ticket_button = KeyboardButton('📚  VIVES parkeerticket  📚')
-mcdo_ticket_button = KeyboardButton('🍔  McDo parkeerticket  🍔')
-bot_kb = ReplyKeyboardMarkup(
-    resize_keyboard=True, one_time_keyboard=True).add(vives_ticket_button).add(mcdo_ticket_button)
+vives_ticket_button = KeyboardButton(text='📚  VIVES parkeerticket  📚')
+mcdo_ticket_button = KeyboardButton(text='🍔  McDo parkeerticket  🍔')
+bot_kb = ReplyKeyboardMarkup(keyboard=[[vives_ticket_button], [mcdo_ticket_button]],
+                             resize_keyboard=True, one_time_keyboard=True)
 
 # Wait for start command and show keyboard
-@dp.message_handler(commands=['start'])
+@dp.message(Command('start'))
 async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` or `/help` command
@@ -45,8 +49,8 @@ async def send_welcome(message: types.Message):
     await message.reply("Hallo!\nKlaar om gratis te parkeren?!\n", reply_markup=bot_kb)
 
 # Wait for ticket command, create ticket and respond with qr
-@dp.message_handler(commands=['ticket'])
-@dp.message_handler(regexp='parkeerticket')
+@dp.message(Command('ticket'))
+@dp.message(F.text.contains('parkeerticket'))
 async def english(message: types.Message):
 
     await message.answer('Code en QR genereren..')
@@ -68,7 +72,7 @@ async def english(message: types.Message):
     elif 'McDo' in message.text:
         code = f'{MCDO_BASE}{year}{month}{day}{hour}{minute}{second}{MCDO_END}'
         type = "McDonald's"
-    
+
     # Create caption
     caption = f"Type: {type}\n\nCode: {code}\n\nScan de QR aan de uitgang van de parking!\n\n\nt.me/XpoKortrijkTicketBot"
 
@@ -113,9 +117,14 @@ async def english(message: types.Message):
     background.save(bio, 'PNG')
     bio.seek(0)
 
+    qr_file = BufferedInputFile(bio.read(), filename="file.txt")
+
     # Send
-    await message.reply_photo(photo=bio)
+    await message.reply_photo(photo=qr_file)
 
 # Run bot
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+async def main():
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
