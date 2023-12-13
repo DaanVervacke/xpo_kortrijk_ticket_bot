@@ -18,8 +18,10 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # ENV stuff
 load_dotenv()
 API_TOKEN = os.getenv('API_TOKEN')  # Your own Telegram bot API token
-BASE = os.getenv('BASE')  # 540513002 (for now)
-END = os.getenv('END')  # 515 (for now)
+VIVES_BASE = os.getenv('VIVES_BASE')
+VIVES_END = os.getenv('VIVES_END')
+MCDO_BASE = os.getenv('MCDO_BASE')  
+MCDO_END = os.getenv('MCDO_END') 
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -29,13 +31,12 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
 # Create custom keyboard
-ticket_button = KeyboardButton('🎟️  Genereer parkeerticket  🎟️')
+vives_ticket_button = KeyboardButton('📚  VIVES parkeerticket  📚')
+mcdo_ticket_button = KeyboardButton('🍔  McDo parkeerticket  🍔')
 bot_kb = ReplyKeyboardMarkup(
-    resize_keyboard=True, one_time_keyboard=True).add(ticket_button)
+    resize_keyboard=True, one_time_keyboard=True).add(vives_ticket_button).add(mcdo_ticket_button)
 
 # Wait for start command and show keyboard
-
-
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     """
@@ -44,9 +45,8 @@ async def send_welcome(message: types.Message):
     await message.reply("Hallo!\nKlaar om gratis te parkeren?!\n", reply_markup=bot_kb)
 
 # Wait for ticket command, create ticket and respond with qr
-
 @dp.message_handler(commands=['ticket'])
-@dp.message_handler(regexp='Genereer parkeerticket')
+@dp.message_handler(regexp='parkeerticket')
 async def english(message: types.Message):
 
     await message.answer('Code en QR genereren..')
@@ -61,10 +61,16 @@ async def english(message: types.Message):
     second = now.strftime('%S')
 
     # Create code with base + time + end
-    code = f'{BASE}{year}{month}{day}{hour}{minute}{second}{END}'
+    if 'VIVES' in message.text:
+        code = f'{VIVES_BASE}{year}{month}{day}{hour}{minute}{second}{VIVES_END}'
+        type = 'VIVES'
 
+    elif 'McDo' in message.text:
+        code = f'{MCDO_BASE}{year}{month}{day}{hour}{minute}{second}{MCDO_END}'
+        type = "McDonald's"
+    
     # Create caption
-    caption = f"Code: {code}\n\nScan de QR aan de uitgang van de parking!\n\n\nt.me/XpoKortrijkTicketBot"
+    caption = f"Type: {type}\n\nCode: {code}\n\nScan de QR aan de uitgang van de parking!\n\n\nt.me/XpoKortrijkTicketBot"
 
     # Create QR
     qr = qrcode.QRCode(
